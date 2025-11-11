@@ -222,6 +222,29 @@ This pipeline provides a solid foundation for RNA-seq analysis. You can extend i
 - **STAR alignment**: ~8GB RAM per sample, 10-30 minutes per sample
 - **FastQC**: ~1GB RAM per sample, 5-10 minutes per sample
 
+## Version Control Best Practices
+
+This repository includes a comprehensive `.gitignore` file that excludes:
+
+- **Data files**: FASTQ, BAM, FASTA, GTF files (too large for git)
+- **Results**: All pipeline outputs in `results/` directory
+- **Temporary files**: Snakemake temporary files, logs, system files
+- **Environment files**: Conda cache and Python bytecode
+
+### What to Track in Git:
+- Pipeline code (`Snakefile`)
+- Configuration templates (`config/config.yaml`, `config/samples.tsv`)
+- Environment definitions (`envs/*.yaml`)
+- Documentation (`README.md`)
+
+### What NOT to Track:
+- Raw data files (FASTQ, reference genomes)
+- Pipeline results and intermediate files
+- Large binary files (STAR indices, BAM files)
+- System-specific temporary files
+
+**Note**: You may want to track your actual `config/samples.tsv` in a separate private repository if it contains sensitive sample information.
+
 ## Contact
 
 For questions or issues, please check the Snakemake documentation or create an issue in the project repository.

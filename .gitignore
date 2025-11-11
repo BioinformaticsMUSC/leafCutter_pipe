@@ -1,0 +1,142 @@
+# =============================================================================
+# RNA-seq Pipeline .gitignore
+# =============================================================================
+
+# FASTQ files (raw sequencing data)
+*.fastq
+*.fastq.gz
+*.fq
+*.fq.gz
+
+# BAM/SAM files (alignment results)
+*.bam
+*.bam.bai
+*.sam
+
+# FASTA/GTF reference files (usually too large for git)
+*.fa
+*.fasta
+*.gtf
+*.gff
+*.gff3
+
+# Results directory (pipeline outputs)
+results/
+logs/
+
+# STAR index files (large binary files)
+**/star_index/
+*.sjdb
+
+# Temporary files
+*.tmp
+*.temp
+
+# =============================================================================
+# Conda/Mamba environment files
+# =============================================================================
+.snakemake/
+.conda/
+__pycache__/
+*.pyc
+*.pyo
+
+# =============================================================================
+# System files
+# =============================================================================
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Linux
+*~
+
+# =============================================================================
+# IDE and Editor files
+# =============================================================================
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# =============================================================================
+# Log files and runtime data
+# =============================================================================
+*.log
+*.out
+*.err
+slurm-*.out
+*.o[0-9]*
+*.e[0-9]*
+
+# =============================================================================
+# Backup files
+# =============================================================================
+*.bak
+*.backup
+*~
+
+# =============================================================================
+# Large data files that shouldn't be in git
+# =============================================================================
+
+# Compressed archives
+*.tar.gz
+*.tar.bz2
+*.zip
+*.7z
+
+# Excel files (often used for sample sheets but can be large)
+*.xlsx
+*.xls
+
+# =============================================================================
+# Config files with sensitive information (optional)
+# =============================================================================
+# Uncomment these if your config files contain sensitive paths/credentials
+# config/config.yaml
+# config/samples.tsv
+
+# =============================================================================
+# Snakemake specific
+# =============================================================================
+.snakemake/
+*.smk.pyc
