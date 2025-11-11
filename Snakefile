@@ -7,6 +7,12 @@ from pathlib import Path
 # Configuration
 configfile: "config/config.yaml"
 
+# Validate required config sections exist
+required_sections = ["samples", "reference", "star"]
+for section in required_sections:
+    if section not in config:
+        raise ValueError(f"Missing required config section: '{section}'. Please check your config.yaml file.")
+
 # Load samples from TSV file
 samples_df = pd.read_csv(config["samples"], sep="\t")
 SAMPLES = samples_df["sample_id"].tolist()
@@ -92,9 +98,6 @@ rule fastqc:
     threads: 2
     conda:
         "envs/qc.yaml"
-    envmodules:
-        config["envmodules"]["biocontainers"],
-        config["envmodules"]["fastqc"]
     shell:
         """
         fastqc {input} -o {params.outdir} -t {threads}
@@ -113,9 +116,6 @@ rule multiqc:
         search_dirs="results/qc/fastqc results/star"
     conda:
         "envs/qc.yaml"
-    envmodules:
-        config["envmodules"]["biocontainers"],
-        config["envmodules"]["multiqc"]
     shell:
         """
         multiqc {params.search_dirs} -o {params.outdir} --force
@@ -133,9 +133,6 @@ rule star_index:
         overhang=config["star"]["read_length"] - 1
     conda:
         "envs/alignment.yaml"
-    envmodules:
-        config["envmodules"]["biocontainers"],
-        config["envmodules"]["star"]
     shell:
         """
         mkdir -p {output}
@@ -165,9 +162,6 @@ rule star_align:
     threads: 8
     conda:
         "envs/alignment.yaml"
-    envmodules:
-        config["envmodules"]["biocontainers"],
-        config["envmodules"]["star"]
     shell:
         """
         STAR --runMode alignReads \
@@ -190,9 +184,6 @@ rule index_bam:
         "results/star/{sample}/Aligned.sortedByCoord.out.bam.bai"
     conda:
         "envs/alignment.yaml"
-    envmodules:
-        config["envmodules"]["biocontainers"],
-        config["envmodules"]["samtools"]
     shell:
         "samtools index {input}"
 
@@ -204,15 +195,12 @@ rule bam_to_junc:
     output:
         junc="results/junctions/{sample}.junc"
     params:
-        min_anchor_length=config["junction"]["min_anchor_length"],
-        min_intron_size=config["junction"]["min_intron_size"],
-        max_intron_size=config["junction"]["max_intron_size"]
+        min_anchor_length=config.get("junction", {}).get("min_anchor_length", 8),
+        min_intron_size=config.get("junction", {}).get("min_intron_size", 50),
+        max_intron_size=config.get("junction", {}).get("max_intron_size", 500000)
     threads: 2
     conda:
         "envs/junction.yaml"
-    envmodules:
-        config["envmodules"]["biocontainers"],
-        config["envmodules"]["regtools"]
     shell:
         """
         echo "Converting {input.bam} to {output.junc}"
@@ -252,10 +240,10 @@ rule leafcutter_cluster:
     params:
         outprefix="leafcutter",
         rundir="results/leafcutter",
-        max_intron_len=config["leafcutter"]["max_intron_len"],
-        min_cluster_reads=config["leafcutter"]["min_cluster_reads"],
-        min_cluster_ratio=config["leafcutter"]["min_cluster_ratio"],
-        include_constitutive=config["leafcutter"]["include_constitutive"]
+        max_intron_len=config.get("leafcutter", {}).get("max_intron_len", 100000),
+        min_cluster_reads=config.get("leafcutter", {}).get("min_cluster_reads", 30),
+        min_cluster_ratio=config.get("leafcutter", {}).get("min_cluster_ratio", 0.001),
+        include_constitutive=config.get("leafcutter", {}).get("include_constitutive", "")
     threads: 4
     conda:
         "envs/leafcutter.yaml"

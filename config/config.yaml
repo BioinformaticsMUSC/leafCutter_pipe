@@ -32,11 +32,13 @@ leafcutter:
   min_cluster_ratio: 0.001  # Minimum fraction of reads supporting a junction (default 0.001)
   include_constitutive: ""  # Include constitutive introns (set to "--includeconst" to enable)
 
-#Environment modules
+# Environment modules (optional - for HPC systems with modules)
+# Note: The pipeline uses conda environments by default for better reproducibility
+# To use environment modules instead, uncomment the envmodules lines in rules
 envmodules:
   biocontainers: "biocontainers"
   star: "star/2.7.10b"
   samtools: "samtools/1.17"
   fastqc: "fastqc/0.12.1"
-  multiqc: "multiqc/1.15"
+  multiqc: "multiqc/1.13a"
   regtools: "regtools/1.0.0"

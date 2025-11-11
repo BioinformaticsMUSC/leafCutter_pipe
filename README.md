@@ -243,6 +243,22 @@ This pipeline provides a solid foundation for RNA-seq analysis. You can extend i
 - **Reuse STAR indices**: If you have multiple projects with the same reference genome, build the index once and reuse it by setting `star.existing_index` in your config
 - **Index compatibility**: STAR indices are generally compatible across minor version updates, but may need rebuilding for major version changes
 
+### Environment Management
+
+The pipeline uses **conda environments** by default for maximum reproducibility and portability. Each rule specifies its required software environment:
+
+- `envs/qc.yaml` - FastQC and MultiQC
+- `envs/alignment.yaml` - STAR and samtools  
+- `envs/junction.yaml` - regtools and samtools
+- `envs/leafcutter.yaml` - Python for LeafCutter
+
+**HPC Users**: If you prefer using environment modules on HPC systems, you can:
+1. Remove the `conda:` lines from rules in the Snakefile
+2. Add `envmodules:` lines (see commented examples in config.yaml)
+3. Run without `--use-conda` flag
+
+**Note**: Don't mix `conda:` and `envmodules:` in the same rule - choose one approach consistently.
+
 ### Resource Requirements
 
 - **STAR indexing**: ~30GB RAM, 30-60 minutes
