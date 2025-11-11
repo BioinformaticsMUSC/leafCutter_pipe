@@ -1,0 +1,20 @@
+# RNA-seq Pipeline Configuration
+
+# Sample information
+samples: "config/samples.tsv"
+
+# Reference genome and annotation
+reference:
+  genome_fasta: "/path/to/genome.fa"  # Update with your genome FASTA path
+  gtf: "/path/to/annotation.gtf"      # Update with your GTF annotation path
+
+# STAR aligner parameters
+star:
+  read_length: 150  # Update based on your sequencing read length
+  existing_index: ""  # Path to existing STAR index (leave empty to build new one)
+  extra_params: "--outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterMismatchNmax 999 --outFilterMismatchNoverReadLmax 0.04 --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000"
+
+# Quality control parameters
+qc:
+  fastqc_params: ""
+  multiqc_params: ""
