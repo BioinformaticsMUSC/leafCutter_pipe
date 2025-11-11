@@ -86,8 +86,8 @@ rule fastqc:
     conda:
         "envs/qc.yaml"
     envmodules:
-        biocontainers=config["envmodules"]["biocontainers"],
-        fastqc=config["envmodules"]["fastqc"]
+        config["envmodules"]["biocontainers"],
+        config["envmodules"]["fastqc"]
     shell:
         """
         fastqc {input} -o {params.outdir} -t {threads}
@@ -107,8 +107,8 @@ rule multiqc:
     conda:
         "envs/qc.yaml"
     envmodules:
-        biocontainers=config["envmodules"]["biocontainers"],
-        multiqc=config["envmodules"]["multiqc"]
+        config["envmodules"]["biocontainers"],
+        config["envmodules"]["multiqc"]
     shell:
         """
         multiqc {params.search_dirs} -o {params.outdir} --force
@@ -127,8 +127,8 @@ rule star_index:
     conda:
         "envs/alignment.yaml"
     envmodules:
-        biocontainers=config["envmodules"]["biocontainers"],
-        star=config["envmodules"]["star"]
+        config["envmodules"]["biocontainers"],
+        config["envmodules"]["star"]
     shell:
         """
         mkdir -p {output}
@@ -159,8 +159,8 @@ rule star_align:
     conda:
         "envs/alignment.yaml"
     envmodules:
-        biocontainers=config["envmodules"]["biocontainers"],
-        star=config["envmodules"]["star"]
+        config["envmodules"]["biocontainers"],
+        config["envmodules"]["star"]
     shell:
         """
         STAR --runMode alignReads \
@@ -184,7 +184,7 @@ rule index_bam:
     conda:
         "envs/alignment.yaml"
     envmodules:
-        biocontainers=config["envmodules"]["biocontainers"],
-        samtools=config["envmodules"]["samtools"]
+        config["envmodules"]["biocontainers"],
+        config["envmodules"]["samtools"]
     shell:
         "samtools index {input}"
