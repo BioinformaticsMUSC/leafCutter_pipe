@@ -18,3 +18,11 @@ star:
 qc:
   fastqc_params: ""
   multiqc_params: ""
+
+#Environment modules
+envmodules:
+  biocontainers: "biocontainers"
+  star: "star/2.7.10b"
+  samtools: "samtools/1.17"
+  fastqc: "fastqc/0.12.1"
+  multiqc: "multiqc/1.15"
