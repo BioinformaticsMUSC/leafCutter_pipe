@@ -88,17 +88,32 @@ star:
 Place your paired-end FASTQ files in the `data/fastq/` directory following this naming convention:
 
 ```
-{sample_id}_R1.fastq.gz
-{sample_id}_R2.fastq.gz
+{sample_id}_R1.{extension}
+{sample_id}_R2.{extension}
 ```
 
-Example:
+**Supported file formats** (automatically detected):
+- `.fastq.gz` (compressed FASTQ - preferred)
+- `.fq.gz` (compressed FASTQ)
+- `.fastq` (uncompressed FASTQ)
+- `.fq` (uncompressed FASTQ)
+
+**Examples:**
 ```
+# Compressed files (recommended)
 data/fastq/sample1_R1.fastq.gz
 data/fastq/sample1_R2.fastq.gz
-data/fastq/sample2_R1.fastq.gz
-data/fastq/sample2_R2.fastq.gz
+
+# Uncompressed files (also supported)  
+data/fastq/sample2_R1.fastq
+data/fastq/sample2_R2.fastq
+
+# Short extensions (also supported)
+data/fastq/sample3_R1.fq.gz
+data/fastq/sample3_R2.fq.gz
 ```
+
+The pipeline automatically detects the file format and adjusts the processing accordingly. Compressed files are preferred for storage efficiency.
 
 ## Running the Pipeline
 
@@ -193,6 +208,8 @@ This pipeline provides a solid foundation for RNA-seq analysis. You can extend i
 2. **Conda environment issues**: Clear conda cache with `conda clean --all`
 3. **Path errors**: Ensure all file paths in config are absolute paths
 4. **Using existing STAR index**: Make sure the existing index was built with the same STAR version and compatible parameters
+5. **File format detection**: Ensure both R1 and R2 files for each sample use the same extension (e.g., both .fastq.gz or both .fastq)
+6. **Missing files**: The pipeline will default to .fastq.gz if files are not found - check your file naming and extensions
 
 ### Performance Tips
 

@@ -23,6 +23,37 @@ def get_star_index_input(wildcards):
         # If building new index, depend on the star_index rule
         return ["results/star_index"]
 
+# Helper function to detect FASTQ file extensions
+def get_fastq_files(sample):
+    """
+    Automatically detect FASTQ file extensions for a given sample.
+    Supports: .fastq.gz, .fq.gz, .fastq, .fq
+    """
+    fastq_dir = Path("data/fastq")
+    
+    # Possible extensions in order of preference (compressed first)
+    extensions = [".fastq.gz", ".fq.gz", ".fastq", ".fq"]
+    
+    for ext in extensions:
+        r1_file = fastq_dir / f"{sample}_R1{ext}"
+        r2_file = fastq_dir / f"{sample}_R2{ext}"
+        
+        if r1_file.exists() and r2_file.exists():
+            return {
+                "r1": str(r1_file),
+                "r2": str(r2_file),
+                "extension": ext,
+                "is_compressed": ext.endswith(".gz")
+            }
+    
+    # If no files found, default to .fastq.gz (will cause error if files don't exist)
+    return {
+        "r1": f"data/fastq/{sample}_R1.fastq.gz",
+        "r2": f"data/fastq/{sample}_R2.fastq.gz", 
+        "extension": ".fastq.gz",
+        "is_compressed": True
+    }
+
 # Define the final target files
 rule all:
     input:
@@ -42,8 +73,8 @@ rule all:
 # FastQC quality control
 rule fastqc:
     input:
-        r1="data/fastq/{sample}_R1.fastq.gz",
-        r2="data/fastq/{sample}_R2.fastq.gz"
+        lambda wildcards: [get_fastq_files(wildcards.sample)["r1"], 
+                          get_fastq_files(wildcards.sample)["r2"]]
     output:
         html_r1="results/qc/fastqc/{sample}_R1_fastqc.html",
         zip_r1="results/qc/fastqc/{sample}_R1_fastqc.zip",
@@ -56,7 +87,7 @@ rule fastqc:
         "envs/qc.yaml"
     shell:
         """
-        fastqc {input.r1} {input.r2} -o {params.outdir} -t {threads}
+        fastqc {input} -o {params.outdir} -t {threads}
         """
 
 # MultiQC to aggregate FastQC and STAR reports
@@ -103,8 +134,8 @@ rule star_index:
 # STAR alignment
 rule star_align:
     input:
-        r1="data/fastq/{sample}_R1.fastq.gz",
-        r2="data/fastq/{sample}_R2.fastq.gz",
+        files=lambda wildcards: [get_fastq_files(wildcards.sample)["r1"], 
+                                get_fastq_files(wildcards.sample)["r2"]],
         index=get_star_index_input
     output:
         bam="results/star/{sample}/Aligned.sortedByCoord.out.bam",
@@ -113,7 +144,8 @@ rule star_align:
     params:
         prefix="results/star/{sample}/",
         index_path=STAR_INDEX,
-        extra=config["star"]["extra_params"]
+        extra=config["star"]["extra_params"],
+        read_command=lambda wildcards: "zcat" if get_fastq_files(wildcards.sample)["is_compressed"] else "cat"
     threads: 8
     conda:
         "envs/alignment.yaml"
@@ -121,8 +153,8 @@ rule star_align:
         """
         STAR --runMode alignReads \
              --genomeDir {params.index_path} \
-             --readFilesIn {input.r1} {input.r2} \
-             --readFilesCommand zcat \
+             --readFilesIn {input.files} \
+             --readFilesCommand {params.read_command} \
              --outFileNamePrefix {params.prefix} \
              --outSAMtype BAM SortedByCoordinate \
              --outSAMunmapped Within \
