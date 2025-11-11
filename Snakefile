@@ -68,7 +68,14 @@ rule all:
         expand("results/star/{sample}/Aligned.sortedByCoord.out.bam", sample=SAMPLES),
         expand("results/star/{sample}/Log.final.out", sample=SAMPLES),
         # BAM indices
-        expand("results/star/{sample}/Aligned.sortedByCoord.out.bam.bai", sample=SAMPLES)
+        expand("results/star/{sample}/Aligned.sortedByCoord.out.bam.bai", sample=SAMPLES),
+        # Junction files
+        expand("results/junctions/{sample}.junc", sample=SAMPLES),
+        # Junction file list
+        "results/junctions/juncfiles.txt",
+        # LeafCutter clustering results
+        "results/leafcutter/leafcutter_perind.counts.gz",
+        "results/leafcutter/leafcutter_perind_numers.counts.gz"
 
 # FastQC quality control
 rule fastqc:
@@ -188,3 +195,81 @@ rule index_bam:
         config["envmodules"]["samtools"]
     shell:
         "samtools index {input}"
+
+# Extract splice junctions from BAM files using regtools
+rule bam_to_junc:
+    input:
+        bam="results/star/{sample}/Aligned.sortedByCoord.out.bam",
+        bai="results/star/{sample}/Aligned.sortedByCoord.out.bam.bai"
+    output:
+        junc="results/junctions/{sample}.junc"
+    params:
+        min_anchor_length=config["junction"]["min_anchor_length"],
+        min_intron_size=config["junction"]["min_intron_size"],
+        max_intron_size=config["junction"]["max_intron_size"]
+    threads: 2
+    conda:
+        "envs/junction.yaml"
+    envmodules:
+        config["envmodules"]["biocontainers"],
+        config["envmodules"]["regtools"]
+    shell:
+        """
+        echo "Converting {input.bam} to {output.junc}"
+        regtools junctions extract \
+            -a {params.min_anchor_length} \
+            -m {params.min_intron_size} \
+            -M {params.max_intron_size} \
+            {input.bam} \
+            -o {output.junc}
+        """
+
+# Create a list of all junction files for downstream analysis
+rule create_junc_list:
+    input:
+        expand("results/junctions/{sample}.junc", sample=SAMPLES)
+    output:
+        "results/junctions/juncfiles.txt"
+    shell:
+        """
+        echo "Creating junction file list..."
+        > {output}
+        for junc_file in {input}; do
+            echo "$junc_file" >> {output}
+        done
+        """
+
+# LeafCutter clustering - groups junctions into intron clusters
+rule leafcutter_cluster:
+    input:
+        juncfiles="results/junctions/juncfiles.txt"
+    output:
+        counts="results/leafcutter/leafcutter_perind.counts.gz",
+        counts_numers="results/leafcutter/leafcutter_perind_numers.counts.gz",
+        pooled="results/leafcutter/leafcutter_pooled",
+        refined="results/leafcutter/leafcutter_refined",
+        sortedlibs="results/leafcutter/leafcutter_sortedlibs"
+    params:
+        outprefix="leafcutter",
+        rundir="results/leafcutter",
+        max_intron_len=config["leafcutter"]["max_intron_len"],
+        min_cluster_reads=config["leafcutter"]["min_cluster_reads"],
+        min_cluster_ratio=config["leafcutter"]["min_cluster_ratio"],
+        include_constitutive=config["leafcutter"]["include_constitutive"]
+    threads: 4
+    conda:
+        "envs/leafcutter.yaml"
+    shell:
+        """
+        mkdir -p {params.rundir}
+        
+        python scripts/leafcutter_cluster_regtools.py \
+            --juncfiles {input.juncfiles} \
+            --outprefix {params.outprefix} \
+            --rundir {params.rundir} \
+            --maxintronlen {params.max_intron_len} \
+            --minclureads {params.min_cluster_reads} \
+            --mincluratio {params.min_cluster_ratio} \
+            --verbose \
+            {params.include_constitutive}
+        """

@@ -1,0 +1,8 @@
+# Junction analysis environment
+name: junction
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - regtools=1.0.0

@@ -19,6 +19,19 @@ qc:
   fastqc_params: ""
   multiqc_params: ""
 
+# Junction extraction parameters
+junction:
+  min_anchor_length: 8      # Minimum anchor length for junction detection
+  min_intron_size: 50       # Minimum intron size (bp)
+  max_intron_size: 500000   # Maximum intron size (bp)
+
+# LeafCutter clustering parameters
+leafcutter:
+  max_intron_len: 100000    # Maximum intron length in bp (default 100,000bp)
+  min_cluster_reads: 30     # Minimum reads in a cluster (default 30 reads)
+  min_cluster_ratio: 0.001  # Minimum fraction of reads supporting a junction (default 0.001)
+  include_constitutive: ""  # Include constitutive introns (set to "--includeconst" to enable)
+
 #Environment modules
 envmodules:
   biocontainers: "biocontainers"
@@ -26,3 +39,4 @@ envmodules:
   samtools: "samtools/1.17"
   fastqc: "fastqc/0.12.1"
   multiqc: "multiqc/1.15"
+  regtools: "regtools/1.0.0"

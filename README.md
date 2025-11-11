@@ -6,6 +6,8 @@ A minimal Snakemake pipeline for RNA-seq transcript quantification with quality 
 
 - **Quality Control**: FastQC for read quality assessment
 - **Alignment**: STAR aligner for mapping reads to reference genome
+- **Junction Extraction**: regtools for splice junction detection
+- **Intron Clustering**: LeafCutter for intron usage quantification
 - **Reporting**: MultiQC for aggregated quality reports
 - **Reproducibility**: Conda environments for software management
 
@@ -179,6 +181,21 @@ snakemake --cores 8 --use-conda results/star/sample1/Aligned.sortedByCoord.out.b
 - **Output**: BAM index file (.bai)
 - **Purpose**: Enable rapid access to alignment data
 
+### 6. Junction Extraction (`bam_to_junc`)
+- **Input**: Indexed BAM files
+- **Output**: Junction files (.junc)
+- **Purpose**: Extract splice junctions using regtools
+
+### 7. Junction List Creation (`create_junc_list`)
+- **Input**: All junction files
+- **Output**: List of junction file paths
+- **Purpose**: Create input file list for LeafCutter clustering
+
+### 8. LeafCutter Clustering (`leafcutter_cluster`)
+- **Input**: Junction file list
+- **Output**: Clustered intron usage counts
+- **Purpose**: Group junctions into clusters and quantify intron usage
+
 ## Outputs
 
 ### Quality Control
@@ -189,6 +206,16 @@ snakemake --cores 8 --use-conda results/star/sample1/Aligned.sortedByCoord.out.b
 - `results/star/{sample}/Aligned.sortedByCoord.out.bam`: Aligned reads
 - `results/star/{sample}/Log.final.out`: STAR alignment statistics
 - `results/star/{sample}/SJ.out.tab`: Splice junction information
+
+### Junction Analysis
+- `results/junctions/{sample}.junc`: Extracted splice junctions per sample
+- `results/junctions/juncfiles.txt`: List of all junction files
+
+### LeafCutter Results
+- `results/leafcutter/leafcutter_perind.counts.gz`: Intron usage counts per individual
+- `results/leafcutter/leafcutter_perind_numers.counts.gz`: Numerator counts for ratio calculations
+- `results/leafcutter/leafcutter_pooled`: Pooled junction data across samples
+- `results/leafcutter/leafcutter_refined`: Refined intron clusters
 
 ## Next Steps
 

@@ -13,6 +13,18 @@
 *.bam.bai
 *.sam
 
+# Junction files
+*.junc
+*juncfiles.txt
+
+# LeafCutter output files
+*_perind.counts.gz
+*_perind_numers.counts.gz
+*_pooled
+*_refined
+*_sortedlibs
+*.counts.gz
+
 # FASTA/GTF reference files (usually too large for git)
 *.fa
 *.fasta
